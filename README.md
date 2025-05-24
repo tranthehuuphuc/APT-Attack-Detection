@@ -12,7 +12,6 @@ This project focuses on detecting **Advanced Persistent Threats (APT)** by analy
 - **Train graph neural networks (GNNs)** such as R-GCN or GAT to detect suspicious behavior patterns by matching them to known TTP sequences.
 
 ## 🧑‍💻 Authors
-Tran The Huu Phuc - Ha Minh Quan
-Faculty of Computer Networks and Communications
-University of Information Technology
-
+- **Tran The Huu Phuc - Ha Minh Quan**
+- ***Faculty of Computer Networks and Communications***
+- ***University of Information Technology***
