@@ -1,23 +1,17 @@
 # Nghiên cứu Giải pháp Phát hiện Tấn công APT thông qua Phân tích Đồ thị Nguồn gốc và Tri thức TTP
 
-<!-- Badges for visual appeal -->
-![Python](https://img.shields.io/badge/Python-3.9-blue.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0-orange.svg)
-![DGL](https://img.shields.io/badge/DGL-1.1-brightgreen.svg)
-![Framework](https://img.shields.io/badge/Framework-MEGR--APT-red.svg)
-
 **Tác giả:** Trần Thế Hữu Phúc - Hà Minh Quân  
-**Giảng viên hướng dẫn:** [Tên GVHD 1], [Tên GVHD 2]  
+**Giảng viên hướng dẫn:** TS. Phan Thế Duy  
 **Trường:** Đại học Công nghệ Thông tin - ĐHQG TP.HCM  
-**Khoa:** Mạng Máy tính và Truyền thông
+**Khoa:** Mạng máy tính và Truyền thông
 
 ---
 
 ## 📌 Giới thiệu
 
-Đồ án này tập trung vào việc xây dựng một hệ thống săn lùng và phát hiện các mối đe dọa dai dẳng (APT) bằng cách áp dụng các kỹ thuật học sâu tiên tiến trên Đồ thị Nguồn gốc (Provenance Graph). Cốt lõi của dự án là sự chuyển dịch từ mô hình phát hiện dựa trên các Chỉ số Tấn công (IOC) tĩnh sang mô hình phát hiện dựa trên **hành vi và cấu trúc của chuỗi tấn công**, được mô tả bởi các Kỹ thuật, Chiến thuật và Thủ tục (TTP) theo framework MITRE ATT\&CK.
+Đồ án này tập trung vào việc xây dựng một hệ thống săn lùng và phát hiện các mối đe dọa dai dẳng (APT) bằng cách áp dụng các kỹ thuật học sâu tiên tiến trên Đồ thị Nguồn gốc (Provenance Graph). Cốt lõi của dự án là sự chuyển dịch từ mô hình phát hiện dựa trên các Chỉ số Tấn công (IOC) tĩnh sang mô hình phát hiện dựa trên **hành vi và cấu trúc của chuỗi tấn công**, được mô tả bởi các Kỹ thuật, Chiến thuật và Quy trình (TTP) theo framework MITRE ATT&CK.
 
-Hệ thống được xây dựng dựa trên phương pháp luận của bài báo khoa học **MEGR-APT** \cite{megr_apt}, kết hợp với một module cải tiến sử dụng **Mô hình Ngôn ngữ Lớn (LLM)** để tự động hóa việc trích xuất tri thức từ các báo cáo tình báo về mối đe dọa (CTI).
+Hệ thống được xây dựng dựa trên phương pháp luận của bài báo khoa học **MEGR-APT**, kết hợp với một module cải tiến sử dụng **Mô hình Ngôn ngữ Lớn (LLM)** để tự động hóa việc trích xuất tri thức từ các báo cáo tình báo về mối đe dọa (CTI).
 
 ## 🎯 Mục tiêu chính
 
@@ -37,7 +31,7 @@ Hệ thống được thiết kế theo một luồng xử lý gồm hai giai đ
 Đây là một quy trình offline, được thực hiện một lần để xây dựng "bộ não" cho hệ thống.
 1.  **Xử lý Log:** Log CDM được xử lý để tạo ra các file `nodes.csv` và `edges.csv`.
 2.  **Gán nhãn TTP:** Các node và edge được làm giàu bằng các nhãn TTP.
-3.  **Trích xuất Subgraph Lành tính:** Hàng nghìn đồ thị con lành tính được tạo ra bằng phương pháp Đi bộ Ngẫu nhiên.
+3.  **Trích xuất Subgraph Lành tính:** Hàng nghìn đồ thị con lành tính được tạo ra bằng phương pháp Đi bộ Ngẫu nhiên lưỡng hướng.
 4.  **Chuẩn bị Dữ liệu Huấn luyện:** Các cặp đồ thị lành tính được tạo ra và Khoảng cách Chỉnh sửa Đồ thị (GED) giữa chúng được tính toán để làm nhãn "chân lý".
 5.  **Huấn luyện:** Mô hình GNN được huấn luyện để học cách xấp xỉ giá trị GED này.
 
@@ -49,40 +43,9 @@ Hệ thống được thiết kế theo một luồng xử lý gồm hai giai đ
 4.  **So khớp & Chấm điểm:** Mô hình GNN tính toán điểm tương đồng giữa đồ thị con và đồ thị truy vấn.
 5.  **Cảnh báo:** Nếu điểm tương đồng vượt ngưỡng, một cảnh báo sẽ được tạo ra.
 
-## 🛠️ Cài đặt và Chạy
-
-### Yêu cầu
-- Python 3.9+
-- Môi trường Conda/Miniforge (khuyến nghị)
-- PyTorch
-- DGL (Deep Graph Library)
-
-Chi tiết các gói cần thiết được liệt kê trong file `requirements.txt`.
-
-### Hướng dẫn Chạy
-1.  **Clone repository:**
-    ```bash
-    git clone [URL repository của bạn]
-    cd [Tên thư mục]
-    ```
-2.  **Tạo Môi trường:**
-    ```bash
-    # (Khuyến nghị) Sử dụng Conda
-    conda create --name apt-gnn-env python=3.9
-    conda activate apt-gnn-env
-    # Cài đặt các gói theo hướng dẫn
-    ```
-3.  **Chạy Pipeline:**
-    Toàn bộ quy trình được điều phối thông qua notebook `main.ipynb`. Hãy mở notebook và chạy các cell theo thứ tự để thực hiện các giai đoạn:
-    - Xử lý Log CDM
-    - Gán nhãn TTP
-    - Trích xuất Subgraph
-    - Chuẩn bị Dữ liệu Huấn luyện
-    - Huấn luyện Mô hình
-    - Săn lùng
 
 ## 📚 Tài liệu tham khảo chính
-[1] Aly, Ahmed, et al. "MEGR-APT: A Memory-Efficient APT Hunting System Based on Attack Representation Learning." *IEEE Transactions on Information Forensics and Security*, 2024.
+Aly, Ahmed, et al. "MEGR-APT: A Memory-Efficient APT Hunting System Based on Attack Representation Learning." *IEEE Transactions on Information Forensics and Security*, 2024.
 
 ---
 *Đồ án Chuyên ngành, Khoa Mạng Máy tính và Truyền thông, Trường Đại học Công nghệ Thông tin - ĐHQG TP.HCM.*
