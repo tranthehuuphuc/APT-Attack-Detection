@@ -77,8 +77,21 @@ pip install --upgrade pip setuptools wheel
 echo "📚 Installing Python packages..."
 pip install -q -r requirements/core.txt
 pip install -q -r requirements/agent.txt
-pip install -q -r requirements/hunting.txt
+
+# Install hunting packages (PyTorch + PyG)
+# Method 1: Try direct install
+pip install -q -r requirements/hunting.txt || {
+  echo "⚠️  Hunting requirements failed, trying alternative method..."
+  
+  # Method 2: Install packages separately
+  pip install -q --extra-index-url https://download.pytorch.org/whl/cpu torch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0
+  pip install -q torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.11.0+cpu.html
+}
+
+# Install engine requirements
 pip install -q -r src/engine/graph_matcher/engine_repo/requirements.txt
+
+# Install g4f for free LLM
 pip install -q g4f
 
 echo "📊 Setting up data..."
