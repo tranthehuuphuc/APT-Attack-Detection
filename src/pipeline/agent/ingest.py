@@ -6,8 +6,11 @@ from pathlib import Path
 from typing import List
 import requests
 from bs4 import BeautifulSoup
+import logging
 
 from src.common.io import write_json
+
+log = logging.getLogger(__name__)
 
 @dataclass
 class CTIItem:
@@ -15,6 +18,51 @@ class CTIItem:
     link: str
     published: str
     text: str
+
+def extract_pdf_text(pdf_path: Path) -> str:
+    """Extract text from PDF file."""
+    try:
+        import PyPDF2
+    except ImportError:
+        log.warning("PyPDF2 not installed. Skipping PDF: %s", pdf_path)
+        return ""
+    
+    try:
+        with open(pdf_path, 'rb') as f:
+            reader = PyPDF2.PdfReader(f)
+            text_parts = []
+            for page in reader.pages:
+                text_parts.append(page.extract_text())
+            return "\n\n".join(text_parts)
+    except Exception as e:
+        log.warning("Failed to extract from PDF %s: %s", pdf_path, e)
+        return ""
+
+def ingest_pdfs(pdf_dir: Path) -> List[CTIItem]:
+    """Ingest CTI reports from PDF files."""
+    items: List[CTIItem] = []
+    
+    if not pdf_dir.exists():
+        log.warning("PDF directory not found: %s", pdf_dir)
+        return items
+    
+    pdf_files = list(pdf_dir.glob("*.pdf"))
+    log.info("Found %d PDF files in %s", len(pdf_files), pdf_dir)
+    
+    for pdf_file in pdf_files:
+        text = extract_pdf_text(pdf_file)
+        if text and len(text) > 100:  # Valid extraction
+            items.append(CTIItem(
+                title=pdf_file.stem,
+                link=str(pdf_file),
+                published="",
+                text=text
+            ))
+            log.info("Extracted %d chars from: %s", len(text), pdf_file.name)
+        else:
+            log.warning("No/little text extracted from: %s", pdf_file.name)
+    
+    return items
 
 def fetch_text(url: str, timeout: int = 20, max_bytes: int = 2_000_000) -> str:
     """Fetch a URL and extract visible text. Best-effort for CTI pages."""

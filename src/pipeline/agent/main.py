@@ -36,6 +36,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rss", nargs="*", default=[])
     ap.add_argument("--rss-file", default="data/cti_reports/rss_seeds.txt")
+    ap.add_argument("--pdf-dir", default=None, help="Directory containing PDF CTI reports")
     ap.add_argument("--per-source-limit", type=int, default=10, help="Max entries per RSS feed (if source is a feed).")
     ap.add_argument("--timeout", type=int, default=20, help="HTTP timeout for CTI fetch.")
     ap.add_argument("--stix", default="data/mitre/enterprise-attack.json")
@@ -92,30 +93,23 @@ def main():
     rf = Path(args.rss_file)
     if rf.exists():
         rss_urls += [l.strip() for l in rf.read_text(encoding="utf-8").splitlines() if l.strip() and not l.strip().startswith("#")]
-    if not rss_urls:
-        raise SystemExit("No RSS sources provided.")
-
-    techniques = load_attack_techniques(Path(args.stix))
-    valid_ids = {t.tid for t in techniques}
-    stix_name_by_id = {t.tid: t.name for t in techniques}
-    # Choose retrieval mode for STIX hints
-    retrieval_mode = args.retrieval
-    if retrieval_mode == "auto":
-        # Embedding retrieval requires OpenAI key (we use OpenAI embeddings).
-        retrieval_mode = "embed" if (llm_backend == "openai" and llm_enabled and _has_openai_key()) else "lexical"
-
-    lexical_retriever = TechniqueRetriever(techniques)
-    embed_model = str(cfg.get("embedding_model", "text-embedding-3-small"))
-    embed_retriever = None
-    if retrieval_mode == "embed" and (llm_backend == "openai") and _has_openai_key():
-        try:
-            embed_retriever = EmbeddingTechniqueRetriever(techniques, embedding_model=embed_model)
-        except Exception:
-            # Fallback to lexical retrieval if embeddings cannot be initialized.
-            embed_retriever = None
-            retrieval_mode = "lexical"
-
-    items = ingest_sources(rss_urls, per_source_limit=args.per_source_limit, timeout=args.timeout)
+    
+    # Ingest from RSS feeds
+    items = []
+    if rss_urls:
+        items = ingest_sources(rss_urls, per_source_limit=args.per_source_limit, timeout=args.timeout)
+        log.info("Ingested %d items from RSS feeds", len(items))
+    
+    # Ingest from PDFs (if provided)
+    if args.pdf_dir:
+        from src.pipeline.agent.ingest import ingest_pdfs
+        pdf_items = ingest_pdfs(Path(args.pdf_dir))
+        items.extend(pdf_items)
+        log.info("Ingested %d items from PDFs", len(pdf_items))
+    
+    if not items:
+        raise SystemExit("No CTI items ingested. Provide RSS feeds (--rss-file) or PDFs (--pdf-dir).")
+    
     save_items(Path(args.out_cti), items)
 
     all_techniques: List[dict] = []
