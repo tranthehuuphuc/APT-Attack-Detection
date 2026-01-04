@@ -1,7 +1,4 @@
 .venv/
 __pycache__/
 *.pyc
-runs/
-data/datasets/
-src/engine/graph_matcher/engine_repo/
 !.gitkeep
