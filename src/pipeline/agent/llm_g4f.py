@@ -57,17 +57,27 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
             logger.error("g4f fallback also failed: %s", e2)
             raise RuntimeError(f"g4f failed: {e}. Fallback also failed: {e2}")
 
-    # g4f may return str or dict-like
+    # g4f may return str, dict, or generator
     if isinstance(resp, str):
         text = resp
     elif isinstance(resp, dict):
         # best effort
         text = resp.get("choices", [{}])[0].get("message", {}).get("content", "") or str(resp)
+    elif hasattr(resp, '__iter__') and not isinstance(resp, (str, dict)):
+        # It's a generator - consume it
+        logger.debug("Response is a generator, consuming...")
+        try:
+            chunks = list(resp)
+            text = "".join(str(chunk) for chunk in chunks)
+            logger.debug("Consumed %d chunks, total length: %d", len(chunks), len(text))
+        except Exception as e:
+            logger.error("Failed to consume generator: %s", e)
+            text = ""
     else:
         text = str(resp)
 
     # Log what we got
-    logger.info("g4f returned %d chars: %s", len(text), text[:200] if len(text) > 200 else text)
+    logger.info("g4f final text %d chars: %s", len(text), text[:200] if len(text) > 200 else text)
 
     if schema is None:
         return {"text": text}
