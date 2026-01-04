@@ -1,0 +1,8 @@
+-r core.txt
+feedparser
+requests
+beautifulsoup4
+lxml
+openai>=1.0.0
+pydantic>=2.0.0
+tiktoken>=0.7.0

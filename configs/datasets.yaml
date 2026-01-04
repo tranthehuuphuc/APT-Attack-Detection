@@ -1,0 +1,13 @@
+tc:
+  cadets:
+    engine_name: DARPA_CADETS
+    root: data/datasets/darpa_cadets
+  theia:
+    engine_name: DARPA_THEIA
+    root: data/datasets/darpa_theia
+  trace:
+    engine_name: DARPA_TRACE
+    root: data/datasets/darpa_trace
+experiments:
+  demo: experiments/DEMO
+  realtime: experiments/REALTIME

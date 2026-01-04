@@ -1,0 +1,4 @@
+window_seconds: 120
+max_nodes: 200000
+k_hop: 2
+output_prefix: qg_in_realtime

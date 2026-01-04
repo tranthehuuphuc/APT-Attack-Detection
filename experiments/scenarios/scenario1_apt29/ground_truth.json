@@ -1,0 +1,246 @@
+{
+    "scenario": "scenario1_apt29_supply_chain",
+    "description": "APT29 (Cozy Bear) supply chain attack simulation based on SolarWinds compromise",
+    "attack_start": null,
+    "attack_end": null,
+    "duration_seconds": 900,
+    "mitre_techniques": [
+        {
+            "technique_id": "T1195.002",
+            "technique_name": "Compromise Software Supply Chain",
+            "tactic": "Initial Access",
+            "description": "Malicious npm package with postinstall script",
+            "timestamp_offset": 10,
+            "process": "bash",
+            "arguments": [
+                "install.sh"
+            ],
+            "is_malicious": true,
+            "severity": "critical",
+            "detection_difficulty": "medium"
+        },
+        {
+            "technique_id": "T1059.004",
+            "technique_name": "Command and Scripting Interpreter: Unix Shell",
+            "tactic": "Execution",
+            "description": "Execution of malicious shell scripts",
+            "timestamp_offset": 30,
+            "process": "bash",
+            "parent_process": "bash",
+            "is_malicious": true,
+            "severity": "high",
+            "detection_difficulty": "easy"
+        },
+        {
+            "technique_id": "T1053.003",
+            "technique_name": "Scheduled Task/Job: Cron",
+            "tactic": "Persistence",
+            "description": "Persistence via cron job creation",
+            "timestamp_offset": 60,
+            "file_created": "/tmp/apt_scenario1_logs/cron_entry.txt",
+            "is_malicious": true,
+            "severity": "critical",
+            "detection_difficulty": "medium"
+        },
+        {
+            "technique_id": "T1552.001",
+            "technique_name": "Unsecured Credentials: Credentials In Files",
+            "tactic": "Credential Access",
+            "description": "Search and collection of SSH keys and credential files",
+            "timestamp_offset": 120,
+            "process": "find",
+            "target_paths": [
+                "~/.ssh",
+                "*.pem",
+                "*.key"
+            ],
+            "is_malicious": true,
+            "severity": "high",
+            "detection_difficulty": "medium"
+        },
+        {
+            "technique_id": "T1082",
+            "technique_name": "System Information Discovery",
+            "tactic": "Discovery",
+            "description": "Enumeration of system information",
+            "timestamp_offset": 180,
+            "commands": [
+                "uname",
+                "whoami",
+                "id",
+                "hostname",
+                "ifconfig"
+            ],
+            "is_malicious": true,
+            "severity": "medium",
+            "detection_difficulty": "hard"
+        },
+        {
+            "technique_id": "T1005",
+            "technique_name": "Data from Local System",
+            "tactic": "Collection",
+            "description": "Collection and archiving of local data",
+            "timestamp_offset": 240,
+            "process": "tar",
+            "files_accessed": [
+                "*.pdf",
+                "*.doc",
+                "*.txt"
+            ],
+            "is_malicious": true,
+            "severity": "high",
+            "detection_difficulty": "medium"
+        },
+        {
+            "technique_id": "T1041",
+            "technique_name": "Exfiltration Over C2 Channel",
+            "tactic": "Exfiltration",
+            "description": "Attempted data exfiltration via curl/wget/nc",
+            "timestamp_offset": 300,
+            "processes": [
+                "curl",
+                "wget",
+                "nc"
+            ],
+            "destination": "192.168.100.200:8080",
+            "is_malicious": true,
+            "severity": "critical",
+            "detection_difficulty": "easy"
+        },
+        {
+            "technique_id": "T1070.004",
+            "technique_name": "Indicator Removal: File Deletion",
+            "tactic": "Defense Evasion",
+            "description": "Clearing bash history and log cleanup",
+            "timestamp_offset": 360,
+            "file_modified": "~/.bash_history",
+            "is_malicious": true,
+            "severity": "high",
+            "detection_difficulty": "medium"
+        }
+    ],
+    "expected_nodes": [
+        {
+            "node_type": "process",
+            "node_id_pattern": "p:*bash*",
+            "exe_pattern": "*install.sh",
+            "is_malicious": true,
+            "attack_stage": "initial_access"
+        },
+        {
+            "node_type": "file",
+            "node_id_pattern": "f:/tmp/.npm_cache/*",
+            "path_pattern": "/tmp/.npm_cache/",
+            "is_malicious": true,
+            "attack_stage": "persistence"
+        },
+        {
+            "node_type": "process",
+            "node_id_pattern": "p:*find*",
+            "args_pattern": "*ssh*",
+            "is_malicious": true,
+            "attack_stage": "credential_access"
+        },
+        {
+            "node_type": "process",
+            "node_id_pattern": "p:*curl*",
+            "args_pattern": "*192.168.100.200*",
+            "is_malicious": true,
+            "attack_stage": "exfiltration"
+        }
+    ],
+    "expected_seeds": {
+        "cti_based": [],
+        "heuristic_based": [
+            {
+                "seed_type": "suspicious_tmp_file",
+                "pattern": "/tmp/.npm_cache/*",
+                "reason": "Hidden directory in /tmp"
+            },
+            {
+                "seed_type": "suspicious_network",
+                "pattern": "192.168.100.200:8080",
+                "reason": "Connection to non-existent C2"
+            },
+            {
+                "seed_type": "suspicious_process",
+                "pattern": "bash *install.sh",
+                "reason": "Execution from /tmp directory"
+            }
+        ]
+    },
+    "indicators_of_compromise": {
+        "file_paths": [
+            "/tmp/.npm_cache/package.json",
+            "/tmp/.npm_cache/install.sh",
+            "/tmp/.npm_cache/stage2.sh",
+            "/tmp/.npm_cache/check.sh",
+            "/tmp/.system_*/collected_data.tar.gz"
+        ],
+        "processes": [
+            "bash install.sh",
+            "bash check.sh",
+            "curl -s http://192.168.100.200:8080",
+            "nc -w 1 192.168.100.200 443"
+        ],
+        "network_connections": [
+            {
+                "destination": "192.168.100.200:8080",
+                "protocol": "http"
+            },
+            {
+                "destination": "192.168.100.200:443",
+                "protocol": "tcp"
+            }
+        ],
+        "registry_keys": [],
+        "file_hashes": []
+    },
+    "detection_expectations": {
+        "minimum_alerts": 3,
+        "maximum_alerts": 8,
+        "critical_techniques_detected": [
+            "T1195.002",
+            "T1041",
+            "T1053.003"
+        ],
+        "expected_true_positives": 6,
+        "expected_false_positives": 2,
+        "expected_false_negatives": 2,
+        "target_precision": 0.75,
+        "target_recall": 0.75,
+        "target_f1": 0.75
+    },
+    "evaluation_criteria": {
+        "seed_identification": {
+            "weight": 0.3,
+            "minimum_seeds_found": 2,
+            "expected_seed_accuracy": 0.8
+        },
+        "technique_detection": {
+            "weight": 0.4,
+            "minimum_techniques_detected": 5,
+            "critical_techniques_weight": 0.6
+        },
+        "graph_quality": {
+            "weight": 0.2,
+            "minimum_nodes": 10,
+            "minimum_edges": 15,
+            "expected_connectivity": 0.7
+        },
+        "performance": {
+            "weight": 0.1,
+            "max_latency_seconds": 300,
+            "max_memory_mb": 4096
+        }
+    },
+    "cleanup_instructions": {
+        "automatic": "bash experiments/scenarios/cleanup.sh",
+        "manual_checks": [
+            "crontab -l | grep npm_cache",
+            "ps aux | grep install.sh",
+            "ls -la /tmp/.npm_cache",
+            "cat ~/.bash_history | tail"
+        ]
+    }
+}

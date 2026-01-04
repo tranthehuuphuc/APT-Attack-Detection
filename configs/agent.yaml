@@ -1,0 +1,12 @@
+chunk_size_chars: 2500
+top_k_retrieval: 6
+min_confidence: 0.35
+
+# LLM Agent (if OPENAI_API_KEY is set and --llm auto/on)
+llm_model: gpt-4o-mini
+llm_chunk_max_chars: 4000
+llm_chunk_overlap: 400
+llm_stix_hint_k: 10
+
+# Embeddings (for --retrieval embed)
+embedding_model: text-embedding-3-small
