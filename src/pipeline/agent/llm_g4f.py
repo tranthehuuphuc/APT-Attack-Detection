@@ -79,6 +79,15 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
     # Log what we got
     logger.info("g4f final text %d chars: %s", len(text), text[:200] if len(text) > 200 else text)
 
+    # CLEANUP: Remove common g4f garbage prefixes
+    garbage_prefixes = [
+        "har_and_cookies dir is not readable",
+        "Using selector: EpollSelector"
+    ]
+    for prefix in garbage_prefixes:
+        if prefix in text:
+            text = text.replace(prefix, "")
+            
     if schema is None:
         return {"text": text}
 
