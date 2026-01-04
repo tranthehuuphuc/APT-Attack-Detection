@@ -56,9 +56,17 @@ def reduce_llm(
 
     best_i: Dict[str, dict] = {}
     for cs in indicator_chunks:
+        if not cs: continue
         for it in cs:
-            typ = (it.get("type") or "").strip()
-            val = (it.get("value") or "").strip()
+            # Handle case where LLM returns string instead of dict
+            if isinstance(it, str):
+                typ = "unknown"
+                val = it.strip()
+                it = {"type": typ, "value": val, "confidence": 0.5}
+            else:
+                typ = (it.get("type") or "").strip()
+                val = (it.get("value") or "").strip()
+            
             if not typ or not val:
                 continue
             key = f"{typ}::{val.lower()}"
