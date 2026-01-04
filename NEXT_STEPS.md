@@ -66,6 +66,9 @@ sudo apt install -y \
   htop \
   tmux
 
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+
 echo "🐍 Setting up Python environment..."
 python3.8 -m venv .venv
 source .venv/bin/activate
