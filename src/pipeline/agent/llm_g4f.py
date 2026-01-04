@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
+import logging
 
 from src.pipeline.agent.json_repair import parse_json, minimal_validate
+
+logger = logging.getLogger(__name__)
 
 def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = None) -> Dict[str, Any]:
     """Educational fallback backend using g4f.
@@ -20,22 +23,30 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
     chosen_model = model or "gpt-3.5-turbo"  # Use more compatible model
 
     if schema is not None:
-        # Encourage strict JSON output
+        # More explicit JSON enforcement
         prompt = (
-            "Return ONLY valid JSON (no markdown, no commentary).\n"
-            "If you cannot find evidence, return empty lists in the JSON.\n\n"
+            "You must return ONLY a valid JSON object. No explanations, no markdown, no code blocks.\n"
+            "Format: {\"techniques\": [...], \"indicators\": [...]}\n"
+            "If you find nothing, return: {\"techniques\": [], \"indicators\": []}\n\n"
             + prompt
         )
 
     try:
         # Use simple approach - let g4f auto-select working provider
+        logger.debug("Calling g4f with model: %s, prompt length: %d", chosen_model, len(prompt))
+        
         resp = g4f.ChatCompletion.create(
             model=chosen_model,
             messages=[{"role": "user", "content": prompt}],
             ignore_working=True,  # Skip provider working checks
             ignore_stream=True,   # Get full response
         )
+        
+        # Log actual response for debugging
+        logger.debug("g4f response type: %s, length: %d", type(resp).__name__, len(str(resp)) if resp else 0)
+        
     except Exception as e:
+        logger.warning("g4f primary call failed: %s. Trying fallback.", e)
         # Fallback: try with minimal options
         try:
             resp = g4f.ChatCompletion.create(
@@ -43,6 +54,7 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
                 messages=[{"role": "user", "content": prompt}],
             )
         except Exception as e2:
+            logger.error("g4f fallback also failed: %s", e2)
             raise RuntimeError(f"g4f failed: {e}. Fallback also failed: {e2}")
 
     # g4f may return str or dict-like
@@ -54,10 +66,14 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
     else:
         text = str(resp)
 
+    # Log what we got
+    logger.info("g4f returned %d chars: %s", len(text), text[:200] if len(text) > 200 else text)
+
     if schema is None:
         return {"text": text}
 
     parsed = parse_json(text)
     return minimal_validate(parsed, schema_name=(schema.get("name") if isinstance(schema, dict) else None))
+
 
 
