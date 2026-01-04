@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "T1588.006", "engagement": "CVE-2025-13915 is described as an authentication bypass flaw."}], "indicators": [{"type": "CVE", "indicator": "CVE-2025-13915", "description": "Vulnerability tracked as CVE-2025-13915 allows attackers to bypass authentication mechanisms."}]}

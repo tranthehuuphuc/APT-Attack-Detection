@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "T1588.006", "technique": "Vulnerabilities"}], "indicators": [{"type": "CVE", "value": "CVE-2023-52163", "evidence": {"span_text": "CVE-2023-52163 Digiever DS-2105 Pro Missing Authorization Vulnerability", "start_char": 322, "end_char": 373}}]}

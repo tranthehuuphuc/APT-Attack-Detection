@@ -1,0 +1,12 @@
+# Government & Official Sources
+https://www.cisa.gov/cybersecurity-advisories/all.xml
+https://www.us-cert.gov/ncas/current-activity.xml
+
+# Security News
+https://www.bleepingcomputer.com/feed/
+https://thehackernews.com/feeds/posts/default
+https://feeds.feedburner.com/TheHackersNews
+
+# Threat Research
+https://www.crowdstrike.com/blog/feed/
+https://www.fireeye.com/blog/threat-research.html/feed

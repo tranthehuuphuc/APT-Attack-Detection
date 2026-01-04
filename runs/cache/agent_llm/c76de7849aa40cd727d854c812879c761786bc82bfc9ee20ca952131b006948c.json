@@ -1,0 +1,1 @@
+{"techniques": ["T1528", "T1550.001"], "indicators": ["identity tokens", "assertions", "forgery", "theft", "misuse"]}

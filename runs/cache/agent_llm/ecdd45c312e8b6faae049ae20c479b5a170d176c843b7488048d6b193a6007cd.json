@@ -1,0 +1,1 @@
+{"techniques": ["T1170", "T1218.005", "T1036.007", "T1027.012"], "indicators": ["mshta.exe", "iinneldc.dll"]}

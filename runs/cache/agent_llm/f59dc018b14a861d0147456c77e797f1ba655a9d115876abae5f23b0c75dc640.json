@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "", "technique_name": "Component Object Model Hijacking", "evidence": {"span_text": "an attacker within range can pair with the device and issue movement commands", "start_char": 268, "end_char": 307}}], "indicators": []}

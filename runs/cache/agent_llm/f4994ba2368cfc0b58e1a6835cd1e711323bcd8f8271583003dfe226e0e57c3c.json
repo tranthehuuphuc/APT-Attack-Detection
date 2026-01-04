@@ -1,0 +1,1 @@
+{"techniques": ["T1176.001", "T1194"], "indicators": ["metrics-trustwallet[.]com", "api.metrics-trustwallet[.]com", "138.124.70.40"]}

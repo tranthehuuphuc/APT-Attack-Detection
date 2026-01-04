@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "T1193", "span_text": "email-borne virus", "start_char": 749, "end_char": 767, "technique_name": "Spearphishing Attachment"}, {"technique_id": "T1499", "span_text": "build networks of distributed denial-of-service (DDoS) agents", "start_char": 1169, "end_char": 1213, "technique_name": "Endpoint Denial of Service"}], "indicators": []}

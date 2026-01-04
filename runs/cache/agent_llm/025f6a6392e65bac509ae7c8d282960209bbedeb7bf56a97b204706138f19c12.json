@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "T1499.002", "technique_name": "Service Exhaustion Flood"}], "indicators": ["VU#484726", "VU#465542", "VU#288574", "CAN-2004-0112", "CAN-2004-0081", "CAN-2004-0079"]}

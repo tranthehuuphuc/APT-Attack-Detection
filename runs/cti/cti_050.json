@@ -1,0 +1,6 @@
+{
+  "title": "ransomware_analysis",
+  "link": "data/cti_reports/pdfs/ransomware_analysis.pdf",
+  "published": "",
+  "text": "REvil Ransomware Technical Analysis\nMALWARE ANALYSIS REPORT\nREvil (Sodinokibi) Ransomware\nSample Information:\nMD5: 5d41402abc4b2a76b9719d911017c592\nSHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nMITRE ATT&CK Mapping:\nDefense Evasion:\nT1027: Obfuscated Files or Information\n  String encryption and API hashing\nT1055: Process Injection\n  Code injection into legitimate processes\nT1562.001: Disable or Modify Tools\n  Terminates security software\nDiscovery:\nT1082: System Information Discovery\nT1083: File and Directory Discovery\nT1018: Remote System Discovery\n  Network scanning for lateral spread\nCollection:\nT1005: Data from Local System\nT1039: Data from Network Shared Drive\nImpact:\nT1486: Data Encrypted for Impact\n  AES-256 encryption of files\nT1490: Inhibit System Recovery\n  Deletes shadow copies and backups\nNetwork IOCs:\nPayment Portal: pay4decryption.onion\nLeak Site: revil-leaks.onion\nFile Indicators:\nRansom Note: readme-decrypt.txt\nExtension: .revil\nRecovery:\n- Isolate affected systems immediately\n- Do not pay ransom\n- Restore from offline backups\n- Contact law enforcement"
+}

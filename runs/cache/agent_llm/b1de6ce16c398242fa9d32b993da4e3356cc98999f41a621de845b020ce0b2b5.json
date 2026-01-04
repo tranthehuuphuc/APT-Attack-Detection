@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "T1528", "evidence": {"span_text": "protecting Tokens and Assertions from Tampering Theft and Misuse", "start_char": 151, "end_char": 197}}, {"technique_id": "T1550.001", "evidence": {"span_text": "protect identity tokens and assertions from forgery, theft, and misuse", "start_char": 252, "end_char": 314}}], "indicators": []}

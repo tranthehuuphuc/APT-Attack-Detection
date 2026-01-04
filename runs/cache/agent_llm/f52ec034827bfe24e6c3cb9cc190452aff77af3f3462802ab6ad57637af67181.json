@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "", "technique": "Socket Filters", "evidence": {"span_text": "but accept values within a broad range.", "start_char": 488, "end_char": 519}}], "indicators": [{"type": "unknown", "value": "CVE-2025-40820", "confidence": 0.5}]}

@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "T1068", "evidence": {"span_text": "this vulnerability can be exploited as a heap overflow, which would allow an attacker to execute arbitrary code", "start_char": 0, "end_char": 88}}], "indicators": [{"span_text": "CVE candidate CAN-2004-0039", "start_char": 288, "end_char": 31}, {"span_text": "VU#790771", "start_char": 261, "end_char": 269}]}

@@ -1,0 +1,1 @@
+{"techniques": [{"technique_id": "T1588.006", "technique_name": "Vulnerabilities"}], "indicators": [{"indicator_type": "CVE", "indicator_value": "CVE-2025-14733", "evidence": {"span_text": "CVE-2025-14733", "start_char": 310, "end_char": 328}}]}
