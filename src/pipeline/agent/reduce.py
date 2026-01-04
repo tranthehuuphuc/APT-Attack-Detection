@@ -33,11 +33,19 @@ def reduce_llm(
 
     best_t: Dict[str, dict] = {}
     for cs in technique_chunks:
+        if not cs: continue
         for it in cs:
-            tid = (it.get("technique_id") or "").strip()
-            name = (it.get("technique_name") or "").strip()
-            if tid and tid in stix_name_by_id:
-                it["technique_name"] = stix_name_by_id[tid]
+            # Handle case where LLM returns string instead of dict
+            if isinstance(it, str):
+                tid = it.strip()
+                name = ""
+                it = {"technique_id": tid, "technique_name": "", "confidence": 0.5}
+            else:
+                tid = (it.get("technique_id") or "").strip()
+                name = (it.get("technique_name") or "").strip()
+                if tid and tid in stix_name_by_id:
+                    it["technique_name"] = stix_name_by_id[tid]
+            
             key = tid or name.lower()
             if not key:
                 continue
