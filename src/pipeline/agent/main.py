@@ -112,6 +112,28 @@ def main():
     
     save_items(Path(args.out_cti), items)
 
+    # Load MITRE techniques and setup retrieval
+    techniques = load_attack_techniques(Path(args.stix))
+    valid_ids = {t.tid for t in techniques}
+    stix_name_by_id = {t.tid: t.name for t in techniques}
+    
+    # Choose retrieval mode for STIX hints
+    retrieval_mode = args.retrieval
+    if retrieval_mode == "auto":
+        # Embedding retrieval requires OpenAI key (we use OpenAI embeddings).
+        retrieval_mode = "embed" if (llm_backend == "openai" and llm_enabled and _has_openai_key()) else "lexical"
+
+    lexical_retriever = TechniqueRetriever(techniques)
+    embed_model = str(cfg.get("embedding_model", "text-embedding-3-small"))
+    embed_retriever = None
+    if retrieval_mode == "embed" and (llm_backend == "openai") and _has_openai_key():
+        try:
+            embed_retriever = EmbeddingTechniqueRetriever(techniques, embedding_model=embed_model)
+        except Exception:
+            # Fallback to lexical retrieval if embeddings cannot be initialized.
+            embed_retriever = None
+            retrieval_mode = "lexical"
+
     all_techniques: List[dict] = []
     all_indicators: List[dict] = []
 
