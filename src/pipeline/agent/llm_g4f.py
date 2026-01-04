@@ -10,9 +10,11 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
     Notes:
     - g4f does NOT support OpenAI structured outputs, so we enforce JSON by prompt and repair/validate client-side.
     - schema is accepted for interface parity, but validation is lightweight.
+    - Uses Blackbox provider to avoid authentication requirements
     """
     try:
         import g4f  # type: ignore
+        from g4f.Provider import Blackbox, DeepInfra, Pizzagpt
     except Exception as e:
         raise RuntimeError("g4f is not installed or failed to import. Install via: pip install -r requirements/g4f.txt") from e
 
@@ -26,10 +28,24 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
             + prompt
         )
 
-    resp = g4f.ChatCompletion.create(
-        model=chosen_model,
-        messages=[{"role": "user", "content": prompt}],
-    )
+    # Try multiple providers that don't require authentication
+    providers = [Blackbox, DeepInfra, Pizzagpt]
+    last_error = None
+    
+    for provider in providers:
+        try:
+            resp = g4f.ChatCompletion.create(
+                model=chosen_model,
+                messages=[{"role": "user", "content": prompt}],
+                provider=provider,
+            )
+            break  # Success, exit loop
+        except Exception as e:
+            last_error = e
+            continue  # Try next provider
+    else:
+        # All providers failed
+        raise RuntimeError(f"All g4f providers failed. Last error: {last_error}")
 
     # g4f may return str or dict-like
     if isinstance(resp, str):
@@ -45,3 +61,4 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
 
     parsed = parse_json(text)
     return minimal_validate(parsed, schema_name=(schema.get("name") if isinstance(schema, dict) else None))
+
