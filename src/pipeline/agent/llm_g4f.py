@@ -10,15 +10,14 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
     Notes:
     - g4f does NOT support OpenAI structured outputs, so we enforce JSON by prompt and repair/validate client-side.
     - schema is accepted for interface parity, but validation is lightweight.
-    - Uses Blackbox provider to avoid authentication requirements
+    - Uses auto provider selection to avoid authentication issues
     """
     try:
         import g4f  # type: ignore
-        from g4f.Provider import Blackbox, DeepInfra, Pizzagpt
     except Exception as e:
         raise RuntimeError("g4f is not installed or failed to import. Install via: pip install -r requirements/g4f.txt") from e
 
-    chosen_model = model or "gpt-4o"
+    chosen_model = model or "gpt-3.5-turbo"  # Use more compatible model
 
     if schema is not None:
         # Encourage strict JSON output
@@ -28,24 +27,23 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
             + prompt
         )
 
-    # Try multiple providers that don't require authentication
-    providers = [Blackbox, DeepInfra, Pizzagpt]
-    last_error = None
-    
-    for provider in providers:
+    try:
+        # Use simple approach - let g4f auto-select working provider
+        resp = g4f.ChatCompletion.create(
+            model=chosen_model,
+            messages=[{"role": "user", "content": prompt}],
+            ignore_working=True,  # Skip provider working checks
+            ignore_stream=True,   # Get full response
+        )
+    except Exception as e:
+        # Fallback: try with minimal options
         try:
             resp = g4f.ChatCompletion.create(
-                model=chosen_model,
+                model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}],
-                provider=provider,
             )
-            break  # Success, exit loop
-        except Exception as e:
-            last_error = e
-            continue  # Try next provider
-    else:
-        # All providers failed
-        raise RuntimeError(f"All g4f providers failed. Last error: {last_error}")
+        except Exception as e2:
+            raise RuntimeError(f"g4f failed: {e}. Fallback also failed: {e2}")
 
     # g4f may return str or dict-like
     if isinstance(resp, str):
@@ -61,4 +59,5 @@ def call_g4f(prompt: str, schema: Optional[dict] = None, model: Optional[str] = 
 
     parsed = parse_json(text)
     return minimal_validate(parsed, schema_name=(schema.get("name") if isinstance(schema, dict) else None))
+
 
